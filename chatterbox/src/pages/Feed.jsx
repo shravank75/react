@@ -90,10 +90,9 @@ export default function Feed() {
 
     setPosts(posts.map(p => p.id === id ? updated : p));
   };
-
-  /* Vulnerable */
+  
   const openInMobile = async (id) => {
-    await fetch("/api/view-mobile", {
+    await fetch("/api/open-url", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

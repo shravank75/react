@@ -11,6 +11,14 @@ const openURLMiddleware = require('@react-native-community/cli-server-api/build/
 const app = connect();
 const upload = multer();
 
+process.on('uncaughtException', (err) => {
+  console.error("Uncaught Exception:", err.message);
+});
+
+process.on('unhandledRejection', (err) => {
+  console.error("Unhandled Rejection:", err);
+});
+
 app.use((req, res, next) => {
   console.log("Incoming:", req.method, req.url);
   next();
@@ -224,7 +232,7 @@ app.use('/api/reset-password', authenticate, (req, res) => {
 
 app.use((req, res, next) => {
 
-  if (!req.url.startsWith('/api/view-mobile')) return next();
+  if (!req.url.startsWith('/api/open-url')) return next();
 
   authenticate(req, res, () => {
 
@@ -278,19 +286,19 @@ app.use((req, res, next) => {
 
 app.use((req, res, next) => {
 
-  if (!req.url.startsWith('/dev/view-mobile')) {
+  if (!req.url.startsWith('/dev/open-url')) {
     return next();
   }
 
   authenticate(req, res, () => {
 
-    try {
-      openURLMiddleware(req, res, next);
-    } catch (err) {
-      console.error("Dev middleware error:", err.message);
-      res.statusCode = 500;
-      res.end("Internal Server Error");
-    }
+    openURLMiddleware(req, res, (err) => {
+      if (err) {
+        console.error("Dev middleware error:", err);
+        res.statusCode = 500;
+        return res.end("Internal Server Error");
+      }
+    });
 
   });
 
